@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SideScroller Demo</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="1024" height="320"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Starfield setup
+        const stars = [];
+        const numStars = 100;
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                speed: 1 + Math.random() * 3,
+                size: 1 + Math.random() * 2
+            });
+        }
+
+        // Longer text array for weekdays
+        const scrollTexts = [
+            "Monday: Let's kick off the week with energy and tackle our goals head-on!",
+            "Tuesday: Keep the momentum rolling strong, pushing through challenges with grit!",
+            "Wednesday: Midweek hustle, powering through the hump to conquer the week!",
+            "Thursday: So close to the finish line, let's wrap up tasks with precision!",
+            "Friday: Hurrah! The weekend's near, let's celebrate our victories and unwind!"
+        ];
+
+        let currentTextIndex = 0;
+        let textX = canvas.width;
+        const textSpeed = -2;
+        const fontSize = 100;
+
+        // Rainbow color effect
+        function getRainbowColor(t) {
+            const r = Math.sin(t) * 127 + 128;
+            const g = Math.sin(t + 2) * 127 + 128;
+            const b = Math.sin(t + 4) * 127 + 128;
+            return `rgb(${r},${g},${b})`;
+        }
+
+        // Improved text rendering with copper effect
+        function drawCopperText(text, x, y) {
+            ctx.font = `bold ${fontSize}px Arial`;
+            const time = Date.now() * 0.002;
+            const textWidth = ctx.measureText(text).width;
+            const step = 10;
+
+            // Draw white text outline for readability
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(text, x, y);
+
+            // Draw copper bars below text
+            for (let i = 0; i < textWidth; i += step) {
+                ctx.fillStyle = getRainbowColor(time + i * 0.02);
+                ctx.fillRect(x + i, y + 20, step, 8); // Copper bar below text
+                ctx.fillRect(x + i, y + 30, step, 5); // Second bar
+            }
+        }
+
+        function animate() {
+            // Draw dark blue sky
+            ctx.fillStyle = '#000033';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw and update stars
+            ctx.fillStyle = '#fff';
+            stars.forEach(star => {
+                star.x -= star.speed;
+                if (star.x < 0) star.x += canvas.width;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw scrolling text
+            const currentText = scrollTexts[currentTextIndex];
+            drawCopperText(currentText, textX, canvas.height / 2);
+            textX += textSpeed;
+
+            // Reset text position and switch text
+            if (textX < -ctx.measureText(currentText).width) {
+                textX = canvas.width;
+                currentTextIndex = (currentTextIndex + 1) % scrollTexts.length;
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
